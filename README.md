@@ -19,6 +19,8 @@ OHLC charts are essential for technical analysis as they provide a visual repres
 
 For more information, see the [Wikipedia article on OHLC charts](https://en.wikipedia.org/wiki/Open-high-low-close_chart).
 
+<img width="1723" height="1049" alt="Screenshot 2025-08-02 at 09 45 17" src="https://github.com/user-attachments/assets/099cfac2-6db9-40fb-9e6f-869b9975b94b" />
+
 ## Library Features
 
 ### Core Library (`SwiftyOHLC`)
