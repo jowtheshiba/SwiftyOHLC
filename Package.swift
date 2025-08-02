@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "SwiftyOHLC",
+    version: "1.0.0",
     platforms: [
         .macOS(.v10_15)
     ],
