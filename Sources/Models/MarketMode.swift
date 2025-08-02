@@ -1,7 +1,7 @@
 import Foundation
 
 /// Market behavior modes for generating synthetic data
-public enum MarketMode: CaseIterable {
+public enum MarketMode: CaseIterable, Sendable {
     /// Flat - sideways movement with small fluctuations
     case flat
     

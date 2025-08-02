@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents a single candlestick with OHLC data
-public struct Candle: Codable, Identifiable {
+public struct Candle: Codable, Identifiable, Sendable {
     public var id = UUID()
     public let timestamp: Date
     public let open: Double

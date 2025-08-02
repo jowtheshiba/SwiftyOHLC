@@ -1,7 +1,7 @@
 import Foundation
 
 /// Configuration for candlestick data generator
-public struct GeneratorConfig {
+public struct GeneratorConfig: Sendable {
     /// Initial price
     public let initialPrice: Double
     
