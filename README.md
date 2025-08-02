@@ -3,6 +3,8 @@
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/yourusername/SwiftyOHLC)
 [![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg)](https://swift.org)
 [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://developer.apple.com/macos/)
+[![macOS](https://img.shields.io/badge/macOS-supported-brightgreen.svg)](https://developer.apple.com/macos/)
+[![Linux](https://img.shields.io/badge/Linux-supported-brightgreen.svg)](https://www.linux.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 A Swift library for generating synthetic OHLC (Open-High-Low-Close) candlestick data with multiple market simulation modes and comprehensive analysis tools.
