@@ -7,7 +7,7 @@
 
 A Swift library for generating synthetic OHLC (Open-High-Low-Close) candlestick data with multiple market simulation modes and comprehensive analysis tools.
 
-## Project Description
+## Description
 
 It provides tools to generate realistic synthetic candlestick data that mimics various market conditions, from stable sideways movements to volatile panic scenarios. The library includes analysis capabilities and visualization tools for technical analysis research and development.
 
