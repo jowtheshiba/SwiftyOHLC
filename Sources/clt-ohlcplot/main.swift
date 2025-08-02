@@ -172,6 +172,7 @@ func generateInteractiveHTML(candles: [Candle], options: [String: String]) -> St
         <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
         <script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
         <script src="https://code.highcharts.com/highcharts.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
         <style>
             * {
                 margin: 0;
@@ -179,72 +180,186 @@ func generateInteractiveHTML(candles: [Candle], options: [String: String]) -> St
                 box-sizing: border-box;
             }
             
-            body {
-                font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-                color: #ffffff;
-                min-height: 100vh;
-                overflow-x: hidden;
+            :root {
+                --primary-color: #0a0e1a;
+                --secondary-color: #1a1f2e;
+                --accent-color: #4facfe;
+                --success-color: #00d4ff;
+                --warning-color: #ffd700;
+                --danger-color: #ff6b6b;
+                --bg-primary: #050709;
+                --bg-secondary: #0a0e1a;
+                --bg-tertiary: #1a1f2e;
+                --text-primary: #ffffff;
+                --text-secondary: #a0a8c0;
+                --text-accent: #4facfe;
+                --border-color: rgba(79, 172, 254, 0.2);
+                --shadow-color: rgba(0,0,0,0.6);
+                --grid-color: rgba(79, 172, 254, 0.05);
+                --chart-bg: #0a0e1a;
+                --card-bg: rgba(26, 31, 46, 0.9);
+                --gradient-primary: linear-gradient(135deg, #4facfe 0%, #00d4ff 100%);
+                --gradient-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                --gradient-accent: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+                --glow-blue: rgba(79, 172, 254, 0.3);
+                --glow-cyan: rgba(0, 212, 255, 0.3);
             }
+            
+                    body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, var(--glow-blue) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, var(--glow-cyan) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px),
+                linear-gradient(0deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 300px 300px, 250px 250px, 200px 200px, 50px 50px, 50px 50px;
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: -1;
+        }
             
             .container {
                 max-width: 1400px;
                 margin: 0 auto;
-                padding: 20px;
+                padding: 30px;
+                position: relative;
             }
             
             .header {
                 text-align: center;
-                margin-bottom: 30px;
-                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-                padding: 30px;
-                border-radius: 20px;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255,255,255,0.1);
+                margin-bottom: 40px;
+                background: var(--card-bg);
+                padding: 40px;
+                border-radius: 16px;
+                border: 1px solid var(--border-color);
+                box-shadow: 0 12px 40px var(--shadow-color);
+                backdrop-filter: blur(15px);
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: var(--gradient-primary);
             }
             
             .header h1 {
-                font-size: 2.5rem;
-                font-weight: 700;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                font-size: 2.8rem;
+                font-weight: 800;
+                background: var(--gradient-primary);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
                 background-clip: text;
                 margin-bottom: 10px;
+                font-family: 'Inter', sans-serif;
+                text-shadow: 0 0 30px var(--glow-blue);
             }
             
             .header p {
                 font-size: 1.1rem;
-                color: #a0a0a0;
-                font-weight: 300;
+                color: var(--text-secondary);
+                font-weight: 400;
+                margin-bottom: 20px;
+            }
+            
+            .header .metadata {
+                display: flex;
+                justify-content: center;
+                gap: 30px;
+                flex-wrap: wrap;
+                font-size: 0.9rem;
+                color: var(--text-secondary);
+            }
+            
+            .metadata-item {
+                display: flex;
+                align-items: center;
+                gap: 5px;
             }
             
             .charts-grid {
                 display: grid;
                 grid-template-columns: 1fr;
                 gap: 30px;
-                margin-bottom: 30px;
+                margin-bottom: 40px;
             }
             
             .chart-container {
-                background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-                border-radius: 20px;
-                padding: 20px;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255,255,255,0.1);
-                box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+                background: var(--card-bg);
+                border-radius: 16px;
+                padding: 30px;
+                border: 1px solid var(--border-color);
+                box-shadow: 0 12px 40px var(--shadow-color);
+                backdrop-filter: blur(15px);
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .chart-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: var(--gradient-secondary);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .chart-container:hover::before {
+                opacity: 1;
+            }
+            
+            .chart-container:hover {
+                box-shadow: 0 20px 60px var(--shadow-color);
+                transform: translateY(-4px) scale(1.02);
             }
             
             .chart-title {
-                font-size: 1.3rem;
-                font-weight: 600;
-                color: #ffffff;
-                margin-bottom: 15px;
+                font-size: 1.4rem;
+                font-weight: 700;
+                color: var(--text-primary);
+                margin-bottom: 20px;
                 text-align: center;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
+                border-bottom: 2px solid var(--accent-color);
+                padding-bottom: 12px;
+                text-shadow: 0 0 15px var(--glow-blue);
+                position: relative;
+            }
+            
+            .chart-title::after {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 50px;
+                height: 2px;
+                background: var(--gradient-primary);
+                border-radius: 1px;
             }
             
             .stats-grid {
@@ -255,81 +370,181 @@ func generateInteractiveHTML(candles: [Candle], options: [String: String]) -> St
             }
             
             .stat-card {
-                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+                background: var(--card-bg);
                 padding: 25px;
-                border-radius: 15px;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255,255,255,0.1);
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                border-radius: 16px;
+                border: 1px solid var(--border-color);
+                box-shadow: 0 12px 40px var(--shadow-color);
+                backdrop-filter: blur(15px);
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .stat-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(45deg, transparent 30%, var(--glow-blue) 50%, transparent 70%);
+                transform: translateX(-100%);
+                transition: transform 0.6s ease;
+            }
+            
+            .stat-card:hover::before {
+                transform: translateX(100%);
             }
             
             .stat-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+                box-shadow: 0 20px 60px var(--shadow-color);
+                transform: translateY(-4px) scale(1.02);
             }
             
             .stat-card h3 {
-                font-size: 1.1rem;
+                font-size: 1rem;
                 font-weight: 600;
-                color: #667eea;
+                color: var(--text-primary);
                 margin-bottom: 10px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
             
             .stat-value {
-                font-size: 1.8rem;
-                font-weight: 700;
-                color: #ffffff;
-                margin-bottom: 5px;
+                font-size: 2rem;
+                font-weight: 800;
+                background: var(--gradient-primary);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                margin-bottom: 8px;
+                font-family: 'Inter', monospace;
+                text-shadow: 0 0 20px var(--glow-blue);
             }
             
             .stat-description {
                 font-size: 0.9rem;
-                color: #a0a0a0;
-                font-weight: 300;
+                color: var(--text-secondary);
+                font-weight: 400;
             }
             
             .chart-wrapper {
                 height: \(height)px;
-                border-radius: 15px;
+                border-radius: 6px;
                 overflow: hidden;
+                position: relative;
+                background: var(--chart-bg);
             }
             
             .small-chart {
                 height: 400px;
-                border-radius: 15px;
+                border-radius: 6px;
                 overflow: hidden;
+                position: relative;
+                background: var(--chart-bg);
+            }
+            
+            .loading-animation {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 1000;
+                background: var(--card-bg);
+                padding: 30px;
+                border-radius: 16px;
+                border: 1px solid var(--border-color);
+                box-shadow: 0 12px 40px var(--shadow-color);
+                backdrop-filter: blur(15px);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+            
+            .spinner {
+                width: 40px;
+                height: 40px;
+                border: 3px solid var(--border-color);
+                border-top: 3px solid var(--accent-color);
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                box-shadow: 0 0 20px var(--glow-blue);
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
             }
             
             @media (max-width: 768px) {
                 .container {
-                    padding: 10px;
+                    padding: 15px;
                 }
                 
                 .header h1 {
-                    font-size: 2rem;
+                    font-size: 2.5rem;
+                }
+                
+                .header p {
+                    font-size: 1.1rem;
                 }
                 
                 .stats-grid {
                     grid-template-columns: 1fr;
                 }
+                
+                .chart-container {
+                    padding: 20px;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                .header h1 {
+                    font-size: 2rem;
+                }
+                
+                .stat-value {
+                    font-size: 1.8rem;
+                }
             }
         </style>
     </head>
     <body>
+        <div class="loading-animation" id="loading">
+            <div class="spinner"></div>
+            <div style="color: var(--text-primary); font-weight: 600;">Loading Scientific Analysis...</div>
+        </div>
+        
         <div class="container">
             <div class="header">
                 <h1>\(title)</h1>
-                <p>Advanced Financial Analysis Dashboard</p>
+                <p>Scientific Financial Data Analysis</p>
+                <div class="metadata">
+                    <div class="metadata-item">
+                        <span>📊</span>
+                        <span>Data Points: \(candles.count)</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span>📅</span>
+                        <span>Period: \(formatDate(candles.first?.timestamp)) - \(formatDate(candles.last?.timestamp))</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span>🔬</span>
+                        <span>Analysis: OHLC + Volatility + Distribution</span>
+                    </div>
+                </div>
             </div>
             
             <div class="charts-grid">
                 <div class="chart-container">
-                    <div class="chart-title">📈 Main OHLC Chart with Moving Averages</div>
+                    <div class="chart-title">📈 OHLC Chart with Moving Averages</div>
                     <div class="chart-wrapper" id="mainChart"></div>
                 </div>
                 
                 <div class="chart-container">
-                    <div class="chart-title">📊 Volatility Analysis</div>
+                    <div class="chart-title">📊 Volatility Analysis (14-period)</div>
                     <div class="small-chart" id="volatilityChart"></div>
                 </div>
                 
@@ -341,45 +556,57 @@ func generateInteractiveHTML(candles: [Candle], options: [String: String]) -> St
             
             <div class="stats-grid">
                 <div class="stat-card">
-                    <h3>📊 Total Candles</h3>
+                    <h3>Data Points</h3>
                     <div class="stat-value">\(candles.count)</div>
-                    <div class="stat-description">Data points analyzed</div>
+                    <div class="stat-description">Total candles analyzed</div>
                 </div>
                 <div class="stat-card">
-                    <h3>📅 Date Range</h3>
-                    <div class="stat-value">\(formatDate(candles.first?.timestamp))</div>
-                    <div class="stat-description">to \(formatDate(candles.last?.timestamp))</div>
-                </div>
-                <div class="stat-card">
-                    <h3>💰 Price Range</h3>
+                    <h3>Price Range</h3>
                     <div class="stat-value">\(String(format: "%.2f", getPriceRange(candles)))</div>
                     <div class="stat-description">High - Low difference</div>
                 </div>
                 <div class="stat-card">
-                    <h3>📈 Total Volume</h3>
+                    <h3>Total Volume</h3>
                     <div class="stat-value">\(String(format: "%.0f", getTotalVolume(candles)))</div>
                     <div class="stat-description">Trading volume</div>
                 </div>
                 <div class="stat-card">
-                    <h3>📊 Average Volatility</h3>
+                    <h3>Avg Volatility</h3>
                     <div class="stat-value">\(String(format: "%.2f", getAverageVolatility(candles)))</div>
                     <div class="stat-description">14-period average</div>
                 </div>
                 <div class="stat-card">
-                    <h3>📉 Price Change</h3>
+                    <h3>Price Change</h3>
                     <div class="stat-value">\(String(format: "%.2f", getPriceChangePercent(candles)))%</div>
                     <div class="stat-description">Overall change</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Analysis Date</h3>
+                    <div class="stat-value">\(formatDate(Date()))</div>
+                    <div class="stat-description">Generated on</div>
                 </div>
             </div>
         </div>
         
         <script>
+            // Hide loading animation
+            function hideLoading() {
+                const loading = document.getElementById('loading');
+                loading.style.opacity = '0';
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                }, 500);
+            }
+            
+            // Initialize and hide loading
+            setTimeout(hideLoading, 1000);
+            
             // Main OHLC Chart
             Highcharts.stockChart('mainChart', {
                 chart: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: 'var(--chart-bg)',
                     style: {
-                        fontFamily: 'SF Pro Display, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                     }
                 },
                 
@@ -404,16 +631,16 @@ func generateInteractiveHTML(candles: [Candle], options: [String: String]) -> St
                 title: {
                     text: '\(title)',
                     style: {
-                        color: '#ffffff',
-                        fontSize: '18px',
+                        color: 'var(--text-primary)',
+                        fontSize: '16px',
                         fontWeight: '600'
                     }
                 },
                 
                 subtitle: {
-                    text: 'Generated with SwiftyOHLC',
+                    text: 'Scientific Financial Analysis',
                     style: {
-                        color: '#a0a0a0'
+                        color: 'var(--text-secondary)'
                     }
                 },
                 
@@ -481,16 +708,25 @@ func generateInteractiveHTML(candles: [Candle], options: [String: String]) -> St
                 plotOptions: {
                     candlestick: {
                         color: '#ff6b6b',
-                        upColor: '#51cf66',
+                        upColor: '#4facfe',
                         lineColor: '#ff6b6b',
-                        upLineColor: '#51cf66'
+                        upLineColor: '#4facfe',
+                        animation: {
+                            duration: 1000
+                        }
                     },
                     column: {
-                        color: '#74c0fc',
-                        borderColor: '#74c0fc'
+                        color: '#00d4ff',
+                        borderColor: '#00d4ff',
+                        animation: {
+                            duration: 1000
+                        }
                     },
                     line: {
-                        lineWidth: 2
+                        lineWidth: 3,
+                        animation: {
+                            duration: 1000
+                        }
                     }
                 },
                 
@@ -507,7 +743,7 @@ func generateInteractiveHTML(candles: [Candle], options: [String: String]) -> St
                     data: [
                         \(sma20Data)
                     ],
-                    color: '#ffd43b',
+                    color: '#4facfe',
                     lineWidth: 2
                 }, {
                     type: 'line',
@@ -515,7 +751,7 @@ func generateInteractiveHTML(candles: [Candle], options: [String: String]) -> St
                     data: [
                         \(sma50Data)
                     ],
-                    color: '#ff922b',
+                    color: '#00d4ff',
                     lineWidth: 2
                 }, {
                     type: 'column',
@@ -556,7 +792,11 @@ func generateInteractiveHTML(candles: [Candle], options: [String: String]) -> St
             Highcharts.chart('volatilityChart', {
                 chart: {
                     backgroundColor: 'transparent',
-                    type: 'area'
+                    type: 'area',
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
                 },
                 
                 title: {
@@ -604,12 +844,15 @@ func generateInteractiveHTML(candles: [Candle], options: [String: String]) -> St
                                 y2: 1
                             },
                             stops: [
-                                [0, 'rgba(255, 107, 107, 0.3)'],
-                                [1, 'rgba(255, 107, 107, 0.1)']
+                                [0, 'rgba(79, 172, 254, 0.4)'],
+                                [1, 'rgba(79, 172, 254, 0.1)']
                             ]
                         },
-                        lineColor: '#ff6b6b',
-                        lineWidth: 2
+                        lineColor: '#4facfe',
+                        lineWidth: 3,
+                        animation: {
+                            duration: 1000
+                        }
                     }
                 },
                 
@@ -633,7 +876,11 @@ func generateInteractiveHTML(candles: [Candle], options: [String: String]) -> St
             Highcharts.chart('distributionChart', {
                 chart: {
                     backgroundColor: 'transparent',
-                    type: 'column'
+                    type: 'column',
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
                 },
                 
                 title: {
@@ -678,9 +925,12 @@ func generateInteractiveHTML(candles: [Candle], options: [String: String]) -> St
                 
                 plotOptions: {
                     column: {
-                        color: '#74c0fc',
-                        borderColor: '#74c0fc',
-                        borderRadius: 3
+                        color: '#00d4ff',
+                        borderColor: '#00d4ff',
+                        borderRadius: 5,
+                        animation: {
+                            duration: 1000
+                        }
                     }
                 },
                 
