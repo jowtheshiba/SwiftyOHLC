@@ -12,6 +12,9 @@ let package = Package(
         .library(
             name: "SwiftyOHLC",
             targets: ["SwiftyOHLC"]),
+        .executable(
+            name: "clt-swiftyohlc",
+            targets: ["clt-swiftyohlc"]),
     ],
     dependencies: [
         // Dependencies can be added here if needed
@@ -20,6 +23,10 @@ let package = Package(
         .target(
             name: "SwiftyOHLC",
             dependencies: [],
-            path: "Sources"),
+            path: "Sources/SwiftyOHLC"),
+        .executableTarget(
+            name: "clt-swiftyohlc",
+            dependencies: ["SwiftyOHLC"],
+            path: "Sources/clt-swiftyohlc"),
     ]
 ) 
