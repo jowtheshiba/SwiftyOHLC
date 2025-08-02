@@ -15,6 +15,9 @@ let package = Package(
         .executable(
             name: "clt-swiftyohlc",
             targets: ["clt-swiftyohlc"]),
+        .executable(
+            name: "clt-ohlcplot",
+            targets: ["clt-ohlcplot"]),
     ],
     dependencies: [
         // Dependencies can be added here if needed
@@ -28,5 +31,9 @@ let package = Package(
             name: "clt-swiftyohlc",
             dependencies: ["SwiftyOHLC"],
             path: "Sources/clt-swiftyohlc"),
+        .executableTarget(
+            name: "clt-ohlcplot",
+            dependencies: ["SwiftyOHLC"],
+            path: "Sources/clt-ohlcplot"),
     ]
 ) 
