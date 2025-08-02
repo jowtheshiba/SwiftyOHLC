@@ -106,7 +106,7 @@ func handleAnalyzeCommand(_ args: [String]) {
 func handleExportCommand(_ args: [String]) {
     guard args.count >= 2 else {
         print("❌ Please specify count and filename")
-        print("Usage: clt-swiftyohlc export <count> <filename> [mode]")
+        print("Usage: clt-swiftyohlc export <count> <filename> [mode] [symbol] [description]")
         exit(1)
     }
     
@@ -117,6 +117,8 @@ func handleExportCommand(_ args: [String]) {
     
     let filename = args[1]
     let mode: MarketMode = args.count > 2 ? parseMarketMode(args[2]) : .flat
+    let symbol: String = args.count > 3 ? args[3] : "SYMBOL"
+    let description: String = args.count > 4 ? args[4] : "Generated OHLC data"
     
     let config = GeneratorConfig(
         marketMode: mode,
@@ -127,9 +129,11 @@ func handleExportCommand(_ args: [String]) {
     let candles = generator.generate()
     
     do {
-        let csvContent = CandleExporter.toCSV(candles)
+        let csvContent = generateCSVWithMetadata(candles: candles, symbol: symbol, description: description)
         try csvContent.write(toFile: filename, atomically: true, encoding: String.Encoding.utf8)
         print("✅ Exported \(candles.count) candles to \(filename)")
+        print("  Symbol: \(symbol)")
+        print("  Description: \(description)")
     } catch {
         print("❌ Export failed: \(error)")
         exit(1)
@@ -137,6 +141,31 @@ func handleExportCommand(_ args: [String]) {
 }
 
 // MARK: - Helper Functions
+
+func generateCSVWithMetadata(candles: [Candle], symbol: String, description: String) -> String {
+    var csv = ""
+    
+    // Add metadata comments
+    csv += "# Symbol: \(symbol)\n"
+    csv += "# Description: \(description)\n"
+    csv += "# Generated: \(Date())\n"
+    csv += "# Mode: \(candles.first?.timestamp ?? Date())\n"
+    csv += "#\n"
+    
+    // Add headers
+    csv += "Timestamp,Open,High,Low,Close,Volume\n"
+    
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+    
+    for candle in candles {
+        let timestamp = dateFormatter.string(from: candle.timestamp)
+        let row = "\(timestamp),\(candle.open),\(candle.high),\(candle.low),\(candle.close),\(candle.volume)\n"
+        csv += row
+    }
+    
+    return csv
+}
 
 func parseMarketMode(_ modeString: String) -> MarketMode {
     switch modeString.lowercased() {
@@ -165,26 +194,28 @@ func printUsage() {
     Usage: clt-swiftyohlc <command> [options]
     
     Commands:
-      generate <count> [mode]     Generate specified number of candles
-      analyze <count> [mode]      Analyze generated candles
-      export <count> <file> [mode] Export candles to file
-      help                        Show this help message
-      version                     Show version information
+      generate <count> [mode]           Generate specified number of candles
+      analyze <count> [mode]            Analyze generated candles
+      export <count> <file> [mode] [symbol] [description] Export candles to file
+      help                              Show this help message
+      version                           Show version information
     
     Available modes:
-      flat (default)              Flat - sideways movement
-      uptrend                     Uptrend
-      downtrend                   Downtrend
-      panic                       Panic - sharp decline
-      newsspike                   News spike
-      consolidation               Consolidation
-      volatile                    Volatile market
+      flat (default)                    Flat - sideways movement
+      uptrend                           Uptrend
+      downtrend                         Downtrend
+      panic                             Panic - sharp decline
+      newsspike                         News spike
+      consolidation                     Consolidation
+      volatile                          Volatile market
     
     Examples:
       clt-swiftyohlc generate 100
       clt-swiftyohlc generate 50 uptrend
       clt-swiftyohlc analyze 200 panic
       clt-swiftyohlc export 500 candles.csv volatile
+      clt-swiftyohlc export 100 btc.csv uptrend BTC "Bitcoin price data"
+      clt-swiftyohlc export 200 aapl.csv flat AAPL "Apple stock data"
     """)
 }
 
