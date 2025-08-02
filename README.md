@@ -182,10 +182,6 @@ try csvContent.write(toFile: "data.csv", atomically: true, encoding: .utf8)
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## Support
 
 For support and questions, please open an issue on the GitHub repository. 
