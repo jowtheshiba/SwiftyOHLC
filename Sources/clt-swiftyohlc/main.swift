@@ -185,6 +185,12 @@ func parseMarketMode(_ modeString: String) -> MarketMode {
         return .volatile
     case "gbm":
         return .gbm
+    case "jump", "jumpdiffusion", "jump-diffusion":
+        return .jumpDiffusion
+    case "garch":
+        return .garch
+    case "ou":
+        return .ou
     default:
         print("⚠️  Unknown mode '\(modeString)', using flat mode")
         return .flat
@@ -211,6 +217,9 @@ func printUsage() {
       consolidation                     Consolidation
       volatile                          Volatile market
       gbm                               Geometric Brownian Motion
+      jumpdiffusion (jump)               Jump-Diffusion (Merton)
+      garch                              GARCH(1,1)
+      ou                                 Ornstein-Uhlenbeck (mean-reverting)
     
     Examples:
       clt-swiftyohlc generate 100
@@ -220,6 +229,9 @@ func printUsage() {
       clt-swiftyohlc export 100 btc.csv uptrend BTC "Bitcoin price data"
       clt-swiftyohlc export 200 aapl.csv flat AAPL "Apple stock data"
       clt-swiftyohlc generate 200 gbm
+      clt-swiftyohlc generate 200 jump
+      clt-swiftyohlc generate 200 garch
+      clt-swiftyohlc generate 200 ou
     """)
 }
 

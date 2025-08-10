@@ -186,6 +186,62 @@ extension SwiftyOHLC {
         )
         return SwiftyOHLC(config: config)
     }
+
+    /// Creates a generator for Jump-Diffusion (Merton)
+    public static func jumpDiffusion(
+        initialPrice: Double = 100.0,
+        drift: Double? = nil,
+        volatility: Double = 0.012,
+        candleCount: Int = 100,
+        candleInterval: TimeInterval = 60.0
+    ) -> SwiftyOHLC {
+        let config = GeneratorConfig(
+            initialPrice: initialPrice,
+            marketMode: .jumpDiffusion,
+            volatility: volatility,
+            trendStrength: drift,
+            candleInterval: candleInterval,
+            candleCount: candleCount
+        )
+        return SwiftyOHLC(config: config)
+    }
+
+    /// Creates a generator for GARCH(1,1)
+    public static func garch(
+        initialPrice: Double = 100.0,
+        drift: Double? = nil,
+        volatility: Double = 0.008,
+        candleCount: Int = 100,
+        candleInterval: TimeInterval = 60.0
+    ) -> SwiftyOHLC {
+        let config = GeneratorConfig(
+            initialPrice: initialPrice,
+            marketMode: .garch,
+            volatility: volatility,
+            trendStrength: drift,
+            candleInterval: candleInterval,
+            candleCount: candleCount
+        )
+        return SwiftyOHLC(config: config)
+    }
+
+    /// Creates a generator for Ornstein-Uhlenbeck mean-reverting process (on log-price)
+    public static func ou(
+        initialPrice: Double = 100.0,
+        meanReversionSpeed: Double? = nil, // reserved for future extension via config
+        volatility: Double = 0.006,
+        candleCount: Int = 100,
+        candleInterval: TimeInterval = 60.0
+    ) -> SwiftyOHLC {
+        let config = GeneratorConfig(
+            initialPrice: initialPrice,
+            marketMode: .ou,
+            volatility: volatility,
+            candleInterval: candleInterval,
+            candleCount: candleCount
+        )
+        return SwiftyOHLC(config: config)
+    }
     
     /// Creates a generator with custom configuration
     /// - Parameter config: Generator configuration

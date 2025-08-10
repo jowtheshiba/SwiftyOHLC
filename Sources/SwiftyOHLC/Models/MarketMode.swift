@@ -26,6 +26,15 @@ public enum MarketMode: CaseIterable, Sendable {
     /// Geometric Brownian Motion - stochastic process with drift and volatility
     case gbm
     
+    /// Jump-Diffusion (Merton) - GBM with rare lognormal jumps
+    case jumpDiffusion
+    
+    /// GARCH(1,1) - time-varying volatility with clustering
+    case garch
+    
+    /// Ornstein-Uhlenbeck (mean-reverting on log-price)
+    case ou
+    
     /// Mode description for user
     public var description: String {
         switch self {
@@ -45,6 +54,12 @@ public enum MarketMode: CaseIterable, Sendable {
             return "Volatile market"
         case .gbm:
             return "Geometric Brownian Motion"
+        case .jumpDiffusion:
+            return "Jump-Diffusion"
+        case .garch:
+            return "GARCH(1,1)"
+        case .ou:
+            return "Ornstein-Uhlenbeck (mean-reverting)"
         }
     }
     
@@ -65,6 +80,12 @@ public enum MarketMode: CaseIterable, Sendable {
             return 0.015 // 1.5%
         case .gbm:
             return 0.01 // 1%
+        case .jumpDiffusion:
+            return 0.012 // 1.2%
+        case .garch:
+            return 0.008 // 0.8%
+        case .ou:
+            return 0.006 // 0.6%
         }
     }
     
@@ -83,6 +104,12 @@ public enum MarketMode: CaseIterable, Sendable {
             return 0.6
         case .gbm:
             return 0.1
+        case .jumpDiffusion:
+            return 0.05
+        case .garch:
+            return 0.0
+        case .ou:
+            return 0.0
         }
     }
 } 

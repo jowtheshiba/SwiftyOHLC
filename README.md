@@ -42,6 +42,10 @@ The main library provides:
   - `newsSpike`: Sudden price movements simulating news events
   - `consolidation`: Range-bound trading with moderate volatility
   - `volatile`: High-frequency price fluctuations
+  - `gbm`: Geometric Brownian Motion (stochastic process with drift and volatility)
+  - `jumpDiffusion`: Jump-Diffusion (Merton) — GBM with occasional jumps
+  - `garch`: GARCH(1,1) — volatility clustering
+  - `ou`: Ornstein–Uhlenbeck — mean-reverting process on log-price
 
 - **Technical Analysis Tools**:
   - Candle pattern recognition (bullish, bearish, doji)
@@ -85,6 +89,15 @@ A comprehensive command-line tool for generating, analyzing, and exporting OHLC 
   clt-swiftyohlc export 100 btc.csv uptrend BTC "Bitcoin price data"
   ```
 
+Additional examples:
+
+```bash
+clt-swiftyohlc generate 200 gbm
+clt-swiftyohlc generate 200 jump
+clt-swiftyohlc generate 200 garch
+clt-swiftyohlc generate 200 ou
+```
+
 #### Available Market Modes:
 - `flat` (default): Sideways movement
 - `uptrend`: Bullish market
@@ -93,6 +106,10 @@ A comprehensive command-line tool for generating, analyzing, and exporting OHLC 
 - `newsspike`: News-driven spikes
 - `consolidation`: Range-bound trading
 - `volatile`: High volatility
+- `gbm`: Geometric Brownian Motion
+- `jumpdiffusion` (alias: `jump`): Jump-Diffusion (Merton)
+- `garch`: GARCH(1,1)
+- `ou`: Ornstein–Uhlenbeck (mean-reverting)
 
 ### clt-ohlcplot
 
@@ -182,8 +199,28 @@ print("Average volume: \(analysis.averageVolume)")
 ### Export to CSV
 
 ```swift
-let csvContent = CandleExporter.exportToCSV(candles: candles)
+let csvContent = candles.toCSV()
 try csvContent.write(toFile: "data.csv", atomically: true, encoding: .utf8)
+```
+
+### Advanced generation modes (factories)
+
+```swift
+// GBM with custom drift/volatility
+let gbmGen = SwiftyOHLC.gbm(initialPrice: 100, drift: 0.1, volatility: 0.01, candleCount: 200)
+let gbmCandles = gbmGen.generate()
+
+// Jump-Diffusion (Merton)
+let jumpGen = SwiftyOHLC.jumpDiffusion(initialPrice: 100, drift: 0.05, volatility: 0.012, candleCount: 200)
+let jumpCandles = jumpGen.generate()
+
+// GARCH(1,1)
+let garchGen = SwiftyOHLC.garch(initialPrice: 100, drift: 0.0, volatility: 0.008, candleCount: 200)
+let garchCandles = garchGen.generate()
+
+// Ornstein–Uhlenbeck (mean-reverting on log-price)
+let ouGen = SwiftyOHLC.ou(initialPrice: 100, volatility: 0.006, candleCount: 200)
+let ouCandles = ouGen.generate()
 ```
 
 ## License

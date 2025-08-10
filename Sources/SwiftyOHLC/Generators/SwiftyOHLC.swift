@@ -6,10 +6,14 @@ public class SwiftyOHLC {
     private var currentPrice: Double
     private var currentTime: Date
     
+    // State for models that require memory
+    private var garchVariance: Double?
+    
     public init(config: GeneratorConfig) {
         self.config = config
         self.currentPrice = config.initialPrice
         self.currentTime = config.startTime
+        self.garchVariance = config.volatility * config.volatility
     }
     
     /// Generates an array of candles according to configuration
@@ -72,6 +76,12 @@ public class SwiftyOHLC {
             return generateVolatileOpenPrice()
         case .gbm:
             return generateGBMOpenPrice()
+        case .jumpDiffusion:
+            return generateJumpDiffusionOpenPrice()
+        case .garch:
+            return generateGARCHOpenPrice()
+        case .ou:
+            return generateOUOpenPrice()
         }
     }
     
@@ -96,6 +106,12 @@ public class SwiftyOHLC {
             return generateVolatileOHLC(open: open)
         case .gbm:
             return generateGBMOHLC(open: open)
+        case .jumpDiffusion:
+            return generateJumpDiffusionOHLC(open: open)
+        case .garch:
+            return generateGARCHOHLC(open: open)
+        case .ou:
+            return generateOUOHLC(open: open)
         }
     }
     
@@ -258,6 +274,141 @@ public class SwiftyOHLC {
         let high = max(open, max(highPrice, close))
         let low = min(open, min(lowPrice, close))
         
+        return (high, low, close)
+    }
+    
+    // MARK: - Jump-Diffusion (Merton)
+    private func generateJumpDiffusionOpenPrice() -> Double {
+        let mu = config.trendStrength * config.volatility
+        let sigma = max(1e-6, config.volatility)
+        let dt = max(1.0 / 390.0, config.candleInterval / 86400.0)
+        let z = RandomGenerator.normal(mean: 0, standardDeviation: 1.0)
+        var multiplier = exp((mu - 0.5 * sigma * sigma) * dt + sigma * sqrt(dt) * z)
+        // Jumps at open with small probability
+        let lambdaPerDay = 0.3
+        let pJump = min(0.5, lambdaPerDay * dt)
+        if Double.random(in: 0...1) < pJump {
+            let jumpMu = -0.02
+            let jumpSigma = 0.08
+            let jz = RandomGenerator.normal(mean: 0, standardDeviation: 1.0)
+            let jumpFactor = exp(jumpMu + jumpSigma * jz)
+            multiplier *= jumpFactor
+        }
+        return max(0.0001, currentPrice * multiplier)
+    }
+    
+    private func generateJumpDiffusionOHLC(open: Double) -> (high: Double, low: Double, close: Double) {
+        let steps = max(4, Int(max(1, round(config.candleInterval / 15.0))))
+        let mu = config.trendStrength * config.volatility
+        let sigma = max(1e-6, config.volatility)
+        let lambdaPerDay = 0.3
+        let dt = max(1e-4, (config.candleInterval / Double(steps)) / 86400.0)
+        let pJump = min(0.5, lambdaPerDay * dt)
+        
+        var price = open
+        var highPrice = open
+        var lowPrice = open
+        
+        for _ in 0..<steps {
+            let z = RandomGenerator.normal(mean: 0, standardDeviation: 1.0)
+            price = price * exp((mu - 0.5 * sigma * sigma) * dt + sigma * sqrt(dt) * z)
+            if Double.random(in: 0...1) < pJump {
+                let jumpMu = -0.02
+                let jumpSigma = 0.08
+                let jz = RandomGenerator.normal(mean: 0, standardDeviation: 1.0)
+                let jumpFactor = exp(jumpMu + jumpSigma * jz)
+                price *= jumpFactor
+            }
+            if price > highPrice { highPrice = price }
+            if price < lowPrice { lowPrice = price }
+        }
+        let close = price
+        let high = max(open, max(highPrice, close))
+        let low = min(open, min(lowPrice, close))
+        return (high, low, close)
+    }
+    
+    // MARK: - GARCH(1,1)
+    private func generateGARCHOpenPrice() -> Double {
+        // Initialize variance if needed
+        if garchVariance == nil { garchVariance = config.volatility * config.volatility }
+        let dt = max(1.0 / 390.0, config.candleInterval / 86400.0)
+        let sigma = sqrt(max(1e-10, garchVariance ?? (config.volatility * config.volatility)))
+        let mu = config.trendStrength * config.volatility
+        let z = RandomGenerator.normal(mean: 0, standardDeviation: 1.0)
+        let multiplier = exp((mu - 0.5 * sigma * sigma) * dt + sigma * sqrt(dt) * z)
+        return max(0.0001, currentPrice * multiplier)
+    }
+    
+    private func generateGARCHOHLC(open: Double) -> (high: Double, low: Double, close: Double) {
+        // Parameters chosen to keep alpha+beta < 1
+        let alpha = 0.10
+        let beta = 0.85
+        let targetVar = max(1e-8, config.volatility * config.volatility)
+        let omega = targetVar * (1 - alpha - beta)
+        if garchVariance == nil { garchVariance = targetVar }
+        
+        let steps = max(4, Int(max(1, round(config.candleInterval / 15.0))))
+        let dt = max(1e-4, (config.candleInterval / Double(steps)) / 86400.0)
+        let mu = config.trendStrength * config.volatility
+        
+        var variance = max(1e-10, garchVariance ?? targetVar)
+        var price = open
+        var highPrice = open
+        var lowPrice = open
+        var prevReturn: Double = 0.0
+        
+        for _ in 0..<steps {
+            let sigma = sqrt(max(1e-12, variance))
+            let z = RandomGenerator.normal(mean: 0, standardDeviation: 1.0)
+            let logReturn = (mu - 0.5 * sigma * sigma) * dt + sigma * sqrt(dt) * z
+            price = price * exp(logReturn)
+            prevReturn = logReturn
+            // Update variance per GARCH(1,1)
+            variance = omega + alpha * (prevReturn * prevReturn) + beta * variance
+            if price > highPrice { highPrice = price }
+            if price < lowPrice { lowPrice = price }
+        }
+        garchVariance = variance // persist state
+        let close = price
+        let high = max(open, max(highPrice, close))
+        let low = min(open, min(lowPrice, close))
+        return (high, low, close)
+    }
+    
+    // MARK: - Ornstein-Uhlenbeck on log-price
+    private func generateOUOpenPrice() -> Double {
+        let thetaLog = log(max(1e-6, config.initialPrice))
+        let kappa = 0.3 // mean reversion speed per day
+        let sigma = max(1e-6, config.volatility)
+        let dt = max(1.0 / 390.0, config.candleInterval / 86400.0)
+        let xPrev = log(max(1e-6, currentPrice))
+        let z = RandomGenerator.normal(mean: 0, standardDeviation: 1.0)
+        let xNext = xPrev + kappa * (thetaLog - xPrev) * dt + sigma * sqrt(dt) * z
+        return max(0.0001, exp(xNext))
+    }
+    
+    private func generateOUOHLC(open: Double) -> (high: Double, low: Double, close: Double) {
+        let steps = max(4, Int(max(1, round(config.candleInterval / 15.0))))
+        let thetaLog = log(max(1e-6, config.initialPrice))
+        let kappa = 0.3
+        let sigma = max(1e-6, config.volatility)
+        let dt = max(1e-4, (config.candleInterval / Double(steps)) / 86400.0)
+        
+        var x = log(max(1e-6, open))
+        var highPrice = open
+        var lowPrice = open
+        
+        for _ in 0..<steps {
+            let z = RandomGenerator.normal(mean: 0, standardDeviation: 1.0)
+            x = x + kappa * (thetaLog - x) * dt + sigma * sqrt(dt) * z
+            let p = exp(x)
+            if p > highPrice { highPrice = p }
+            if p < lowPrice { lowPrice = p }
+        }
+        let close = exp(x)
+        let high = max(open, max(highPrice, close))
+        let low = min(open, min(lowPrice, close))
         return (high, low, close)
     }
     
