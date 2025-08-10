@@ -183,6 +183,8 @@ func parseMarketMode(_ modeString: String) -> MarketMode {
         return .consolidation
     case "volatile":
         return .volatile
+    case "gbm":
+        return .gbm
     default:
         print("⚠️  Unknown mode '\(modeString)', using flat mode")
         return .flat
@@ -208,6 +210,7 @@ func printUsage() {
       newsspike                         News spike
       consolidation                     Consolidation
       volatile                          Volatile market
+      gbm                               Geometric Brownian Motion
     
     Examples:
       clt-swiftyohlc generate 100
@@ -216,6 +219,7 @@ func printUsage() {
       clt-swiftyohlc export 500 candles.csv volatile
       clt-swiftyohlc export 100 btc.csv uptrend BTC "Bitcoin price data"
       clt-swiftyohlc export 200 aapl.csv flat AAPL "Apple stock data"
+      clt-swiftyohlc generate 200 gbm
     """)
 }
 

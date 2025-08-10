@@ -23,6 +23,9 @@ public enum MarketMode: CaseIterable, Sendable {
     /// Volatile market - random sharp movements
     case volatile
     
+    /// Geometric Brownian Motion - stochastic process with drift and volatility
+    case gbm
+    
     /// Mode description for user
     public var description: String {
         switch self {
@@ -40,6 +43,8 @@ public enum MarketMode: CaseIterable, Sendable {
             return "Consolidation"
         case .volatile:
             return "Volatile market"
+        case .gbm:
+            return "Geometric Brownian Motion"
         }
     }
     
@@ -58,6 +63,8 @@ public enum MarketMode: CaseIterable, Sendable {
             return 0.002 // 0.2%
         case .volatile:
             return 0.015 // 1.5%
+        case .gbm:
+            return 0.01 // 1%
         }
     }
     
@@ -74,6 +81,8 @@ public enum MarketMode: CaseIterable, Sendable {
             return -0.9
         case .newsSpike:
             return 0.6
+        case .gbm:
+            return 0.1
         }
     }
 } 

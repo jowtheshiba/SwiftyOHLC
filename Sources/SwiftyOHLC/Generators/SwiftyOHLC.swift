@@ -70,6 +70,8 @@ public class SwiftyOHLC {
             return generateConsolidationOpenPrice()
         case .volatile:
             return generateVolatileOpenPrice()
+        case .gbm:
+            return generateGBMOpenPrice()
         }
     }
     
@@ -92,6 +94,8 @@ public class SwiftyOHLC {
             return generateConsolidationOHLC(open: open)
         case .volatile:
             return generateVolatileOHLC(open: open)
+        case .gbm:
+            return generateGBMOHLC(open: open)
         }
     }
     
@@ -214,6 +218,45 @@ public class SwiftyOHLC {
         let shadowSize = abs(RandomGenerator.exponential(lambda: 1.0)) * config.volatility
         let high = max(open, close) * (1 + shadowSize)
         let low = min(open, close) * (1 - shadowSize)
+        
+        return (high, low, close)
+    }
+    
+    // MARK: - GBM Mode (Geometric Brownian Motion)
+    // S_{t+dt} = S_t * exp((mu - 0.5*sigma^2)*dt + sigma*sqrt(dt)*Z)
+    // We simulate intra-candle micro steps to derive realistic High/Low
+    private func generateGBMOpenPrice() -> Double {
+        // Drift is derived from trendStrength; volatility uses config.volatility
+        let mu = config.trendStrength * config.volatility
+        let sigma = max(1e-6, config.volatility)
+        let dt = max(1.0 / 390.0, config.candleInterval / 86400.0) // normalize to trading day fractions
+        let z = RandomGenerator.normal(mean: 0, standardDeviation: 1.0)
+        let multiplier = exp((mu - 0.5 * sigma * sigma) * dt + sigma * sqrt(dt) * z)
+        return max(0.0001, currentPrice * multiplier)
+    }
+    
+    private func generateGBMOHLC(open: Double) -> (high: Double, low: Double, close: Double) {
+        // Number of micro-steps within one candle
+        let steps = max(4, Int(max(1, round(config.candleInterval / 15.0)))) // at least 4, ~15s step
+        let mu = config.trendStrength * config.volatility
+        let sigma = max(1e-6, config.volatility)
+        let dt = max(1e-4, (config.candleInterval / Double(steps)) / 86400.0)
+        
+        var price = open
+        var highPrice = open
+        var lowPrice = open
+        
+        for _ in 0..<steps {
+            let z = RandomGenerator.normal(mean: 0, standardDeviation: 1.0)
+            price = price * exp((mu - 0.5 * sigma * sigma) * dt + sigma * sqrt(dt) * z)
+            if price > highPrice { highPrice = price }
+            if price < lowPrice { lowPrice = price }
+        }
+        let close = price
+        
+        // Guard against degenerate values
+        let high = max(open, max(highPrice, close))
+        let low = min(open, min(lowPrice, close))
         
         return (high, low, close)
     }

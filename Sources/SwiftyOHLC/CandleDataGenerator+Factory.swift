@@ -161,6 +161,32 @@ extension SwiftyOHLC {
         return SwiftyOHLC(config: config)
     }
     
+    /// Creates a generator for Geometric Brownian Motion (GBM)
+    /// - Parameters:
+    ///   - initialPrice: Initial price
+    ///   - drift: Drift coefficient (approx trend). If nil, uses mode suggested
+    ///   - volatility: Volatility (sigma)
+    ///   - candleCount: Number of candles
+    ///   - candleInterval: Interval between candles
+    /// - Returns: Configured generator
+    public static func gbm(
+        initialPrice: Double = 100.0,
+        drift: Double? = nil,
+        volatility: Double = 0.01,
+        candleCount: Int = 100,
+        candleInterval: TimeInterval = 60.0
+    ) -> SwiftyOHLC {
+        let config = GeneratorConfig(
+            initialPrice: initialPrice,
+            marketMode: .gbm,
+            volatility: volatility,
+            trendStrength: drift,
+            candleInterval: candleInterval,
+            candleCount: candleCount
+        )
+        return SwiftyOHLC(config: config)
+    }
+    
     /// Creates a generator with custom configuration
     /// - Parameter config: Generator configuration
     /// - Returns: Configured generator
